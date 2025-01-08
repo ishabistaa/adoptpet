@@ -1,200 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pets for Adoption</title>
-    <script src="index.js" defer></script>
-    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js"></script>
-    <script src ="https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Pets for Adoption</title>
+  <link rel="stylesheet" href="viewPets.css">
 </head>
 <body>
-    <h2>Pets for Adoption</h2>
+  <h1>Pets Available for Adoption</h1>
+  <div id="petsContainer">
+   
+  </div>
+  
+  <script type="module">
     
-    <div class="pet-grid" id="adoptionGrid"></div>
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
 
-    <!-- Pet Details Modal for Adoption -->
-    <div id="petModalAdopt" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div id="petDetailsAdopt"></div>
-            <div class="modal-buttons">
-                <a href="message.html">
-                    <button class="btn primary chat-btn">Chat with Owner</button>
-                </a>
-                <a href="ConfirmAdoptOrder.html">
-                    <button class="btn primary get-pet-btn">Get This Pet</button>
-                </a>
-            </div>
-        </div>
-    </div>
+    // firebase ko config
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4l9MAjo0nwg8svNH2nCe1amzsRnu11Lk",
+      authDomain: "adopet-9b45a.firebaseapp.com",
+      databaseURL: "https://adopet-9b45a-default-rtdb.firebaseio.com",
+      projectId: "adopet-9b45a",
+      storageBucket: "adopet-9b45a.firebaseapp.com",
+      messagingSenderId: "528567839616",
+      appId: "1:528567839616:web:def598f1423ef83ab6f65",
+      measurementId: "G-GK1YF97X41"
+    };
 
-    <script>
-        // Fetch data from Firebase Realtime Database
-        const dbUrl = "http://localhost:8000/adoption-posts";
-        // URL to your Firebase data
-        
-        // Function to fetch adoption posts and display them
-        fetch(dbUrl)
-            .then(response => response.json())
-            .then(data => {
-                const adoptionGrid = document.getElementById('adoptionGrid');
-                const petForm = data.petForm;
+    
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
 
-                for (let postId in petForm) {
-                    if (petForm[postId].category === 'adoption') {
-                        const pet = petForm[postId];
-                        
-                        // Create pet card element
-                        const petCard = document.createElement('div');
-                        petCard.classList.add('pet-card');
-                        petCard.setAttribute('data-id', postId);
+    
+    const petRef = ref(database, "petForm");
 
-                        petCard.innerHTML = `
-                            <img src="${pet.petPhoto}" alt="${pet.petName}" class="pet-photo">
-                            <h3>${pet.petName}</h3>
-                            <p>Breed: ${pet.breed}</p>
-                            <p>Age: ${pet.age}</p>
-                            <p>Location: ${pet.location}</p>
-                        `;
-
-                        // Add click event to show pet details in modal
-                        petCard.addEventListener('click', () => {
-                            showPetDetails(pet, postId);
-                        });
-
-                        adoptionGrid.appendChild(petCard);
-                    }
-                }
-            })
-            .catch(error => console.error('Error fetching data:', error));
-
-        // Function to show pet details in modal
-        function showPetDetails(pet, postId) {
-            const petModalAdopt = document.getElementById('petModalAdopt');
-            const petDetailsAdopt = document.getElementById('petDetailsAdopt');
-            const closeModal = document.querySelector('.modal .close');
-
-            // Populate pet details in the modal
-            petDetailsAdopt.innerHTML = `
-                <h3>${pet.petName}</h3>
-                <img src="${pet.petPhoto}" alt="${pet.petName}" class="pet-photo">
-                <p><strong>Breed:</strong> ${pet.breed}</p>
-                <p><strong>Age:</strong> ${pet.age}</p>
-                <p><strong>Location:</strong> ${pet.location}</p>
-                <p><strong>Description:</strong> ${pet.description}</p>
-                <p><strong>Vaccination Date:</strong> ${pet.vaccinationDate}</p>
-                <p><strong>Total Vaccinations:</strong> ${pet.totalVaccinations}</p>
-                 <p><strong>vetDocuments:</strong> ${pet.vetDocuments}</p>
-                 <p><strong>sex:</strong> ${pet.sex}</p>
-                  <p><strong>weight:</strong> ${pet.weight}</p>
-                  <p><strong>category:</strong> ${pet.category}</p>
-
-            `;
-
-            // Show modal
-            petModalAdopt.style.display = "block";
-
-            // Close modal event
-            closeModal.onclick = () => {
-                petModalAdopt.style.display = "none";
-            };
-
-            // Close modal when clicking outside
-            window.onclick = (event) => {
-                if (event.target === petModalAdopt) {
-                    petModalAdopt.style.display = "none";
-                }
-            };
-        }
-    </script>
-
-    <style>
-        /* Basic styles for the page */
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .pet-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .pet-card {
-            border: 1px solid #ccc;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .pet-card img {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 50px;
-            box-sizing: border-box;
-        }
-
-        .modal-content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            max-width: 600px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        .close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 30px;
-            cursor: pointer;
-        }
-
-        .modal-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .primary {
-            background-color: #007BFF;
-            color: white;
-        }
-
-        .chat-btn {
-            background-color: #28a745;
-        }
-
-        .get-pet-btn {
-            background-color: #ffc107;
-        }
-    </style>
+    
+    const petsContainer = document.getElementById("petsContainer");
+    onValue(petRef, (snapshot) => {
+      const pets = snapshot.val();
+      petsContainer.innerHTML = ""; 
+      for (const petId in pets) {
+        const pet = pets[petId];
+        const petCard = `
+          <div class="pet-card">
+            <h2>${pet.petName} (${pet.sex})</h2>
+            <p><strong>Breed:</strong> ${pet.breed}</p>
+            <p><strong>Age:</strong> ${pet.age} years</p>
+            <p><strong>Weight:</strong> ${pet.weight} kg</p>
+            <p><strong>Location:</strong> ${pet.location}</p>
+            <p><strong>Description:</strong> ${pet.description}</p>
+            <p><strong>Category:</strong> ${pet.category}</p>
+            <img src="${pet.petPhoto}" alt="${pet.petName}" style="width: 200px; height: auto;">
+          </div>
+        `;
+        petsContainer.innerHTML += petCard;
+      }
+    });
+  </script>
 </body>
 </html>
